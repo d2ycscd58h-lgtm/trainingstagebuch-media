@@ -1,0 +1,25 @@
+name: Bilder laden
+on:
+  push:
+    paths: ['fetch/list.txt']
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download
+        run: |
+          mkdir -p incoming
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            curl -sSL -o "incoming/$name" "$url"
+          done < fetch/list.txt
+      - name: Commit
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add incoming
+          git commit -m "Bilder geladen" || echo "nichts neu"
+          git push
